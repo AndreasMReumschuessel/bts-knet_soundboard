@@ -1,0 +1,42 @@
+appId: com.bts-soundboard.app
+productName: BTS Soundboard
+copyright: Copyright (c) 2026 BTS Soundboard
+
+# Build the shared package + PWA first:
+#   pnpm build:shared
+#   pnpm -F @bts-soundboard/web build      # -> apps/web/dist
+#   pnpm -F @bts-soundboard/desktop build   # -> apps/desktop/dist (main + preload)
+# Then:
+#   pnpm -F @bts-soundboard/desktop package # -> apps/desktop/dist-electron
+directories:
+  output: dist-electron
+  buildResources: build
+
+# Compiled main/preload + package.json go into app.asar.
+files:
+  - dist/**/*
+  - package.json
+  - "!dist-electron"
+  - "!build"
+
+# The built PWA is shipped as an unpacked resource at <resourcesPath>/pwa/.
+# main.ts loads <resourcesPath>/pwa/index.html when app.isPackaged.
+extraResources:
+  - from: ../web/dist
+    to: pwa
+    filter:
+      - "**/*"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-${arch}-setup.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

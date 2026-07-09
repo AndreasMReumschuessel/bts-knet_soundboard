@@ -1,0 +1,14 @@
+{
+  "//": "CommonJS main process (see apps/desktop/package.json `type: commonjs`). NodeNext resolves the module kind from the package.json `type` field, so .ts files here compile to CJS (the most launch/packaging-reliable Electron config; preload ESM has caveats per Electron's ESM docs and this env can't launch a GUI to verify them). OVERRIDE: `verbatimModuleSyntax` is set to `false` here as a scoped deviation from ADR-0001's project-wide `true` — CJS files cannot contain ES import/export syntax under verbatimModuleSyntax, and we want to keep ES `import`/`import type` syntax for clarity. All other base settings (strict, noUncheckedIndexedAccess, NodeNext, skipLibCheck) are inherited unchanged. All imports from @bts-soundboard/shared are type-only and erased, so there is no runtime ESM/CJS interop concern.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "verbatimModuleSyntax": false,
+    "declaration": false,
+    "declarationMap": false,
+    "types": ["node"]
+  },
+  "references": [{ "path": "../../packages/shared" }],
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@bts-soundboard/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "BTS Soundboard backend: REST for sound files + WebSocket broadcast of play events.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@bts-soundboard/shared": "workspace:*",
+    "busboy": "^1.6.0",
+    "mp3-duration": "^1.1.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/busboy": "^1.5.4",
+    "@types/node": "^20.14.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.4.5"
+  }
+}

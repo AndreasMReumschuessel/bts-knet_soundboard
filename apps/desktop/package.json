@@ -1,0 +1,25 @@
+{
+  "name": "@bts-soundboard/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "BTS Soundboard Electron app: wraps the React PWA and adds OS-level global hotkeys (Windows).",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsc -p tsconfig.json && cross-env NODE_ENV=development electron .",
+    "build": "tsc -p tsconfig.json",
+    "start": "electron .",
+    "package": "electron-builder --win nsis",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@bts-soundboard/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "cross-env": "^7.0.3",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.4.5"
+  }
+}

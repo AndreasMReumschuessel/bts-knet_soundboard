@@ -1,0 +1,28 @@
+{
+  "//": "Base TS config. Apps extend this and add their own `references`. `packages/shared` adds `composite: true`. We use NodeNext module resolution (see ADR-0001): it is the strictest option and works natively for the Node server; Vite/Electron consume the ESM build of `packages/shared` via the package `exports` map.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "useDefineForClassFields": true,
+    "paths": {
+      "@bts-soundboard/shared": ["./packages/shared/src/index.ts"],
+      "@bts-soundboard/shared/*": ["./packages/shared/src/*"]
+    }
+  }
+}

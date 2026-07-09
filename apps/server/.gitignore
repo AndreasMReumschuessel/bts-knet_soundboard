@@ -1,0 +1,14 @@
+# Build output
+dist/
+*.tsbuildinfo
+
+# Runtime data dir (sounds + catalog.json), created on startup
+data/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log

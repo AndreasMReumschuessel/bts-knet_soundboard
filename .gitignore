@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Runtime data (sounds + catalog.json), created by the server on startup
+data/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Electron build output
+apps/desktop/release/
+apps/desktop/out/
+apps/desktop/dist-electron/
+
+# Coverage
+coverage/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Internal tooling
+.chunkhound/

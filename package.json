@@ -1,0 +1,24 @@
+{
+  "name": "bts-soundboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cross-platform realtime soundboard: one client triggers a sound, every connected client plays it.",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build:shared": "pnpm -F @bts-soundboard/shared build",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "dev:web": "pnpm -F @bts-soundboard/web dev",
+    "dev:server": "pnpm -F @bts-soundboard/server dev",
+    "dev:desktop": "pnpm -F @bts-soundboard/desktop dev",
+    "dev": "pnpm -r --parallel dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
