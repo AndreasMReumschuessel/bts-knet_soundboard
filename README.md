@@ -1,72 +1,201 @@
-# BTS Soundboard
+# 🎵 BTS Soundboard
 
-A cross-platform **realtime soundboard**: one client triggers a sound and
-**every connected client plays it** synchronously. Built for friends hanging
-out in Discord who each keep the app open in the background / on another
-screen.
+A cross-platform **realtime soundboard** — one person triggers a sound, and
+**every connected client plays it** at the same time. Built for groups of
+friends hanging out in Discord who each keep the app running on a phone or
+desktop.
 
-- **React PWA** (`apps/web`) — runs in Android browsers and as the Electron
-  renderer. Local sound caching (Cache API / IndexedDB), Web Audio playback,
-  WebSocket client.
-- **Electron** (`apps/desktop`) — Windows wrapper. OS-level global hotkeys via
-  `globalShortcut`; a hotkey press emits a `play` event over WS.
-- **Node/TS backend** (`apps/server`) — REST for sound files + WebSocket server
-  that broadcasts `play` events to all connected clients.
-- **Shared package** (`packages/shared`) — TypeScript types + Zod schemas. The
-  single source of truth for all data contracts.
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)
+![pnpm](https://img.shields.io/badge/pnpm-workspaces-F69220.svg)
+![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8.svg)
 
-## Hotkey → play flow
+---
 
-```
-Desktop globalShortcut fires
-  → Electron emits `play` WS event to backend
-  → backend broadcasts `play` to ALL clients (including originator)
-  → each client plays the sound via Web Audio
-```
+## ✨ Features
 
-Clients **never** play locally on a broadcast trigger — they play only when
-they receive the broadcast, so timing is uniform and there's no double-play.
-The single exception is **preview**, a client-local code path that never
-touches the WS layer.
+- **Realtime broadcast play** — when anyone triggers a sound, all connected
+  clients play it simultaneously. No double-play, no desync.
+- **Global hotkeys (desktop)** — assign OS-level hotkeys to any sound. Works
+  while Discord, a game, or any other app is focused.
+- **PWA on mobile** — installable on Android, works offline with cached sounds.
+- **Upload & share** — upload MP3 files; they're automatically distributed to
+  all connected clients.
+- **Preview mode** — listen to a sound locally without broadcasting it to others.
+- **Master volume** — per-device volume control, persisted across sessions.
+- **Offline playback** — sounds are cached via the Cache API and service worker.
 
-## Monorepo layout
+## 🏗️ Architecture
 
 ```
-apps/web        React PWA (Vite + React + TS)
-apps/desktop    Electron wrapper (globalShortcut, electron-builder)
-apps/server     Node/TS backend (REST + WS, Zod validation)
-packages/shared TS types + Zod schemas (consumed by all three apps)
-docs/adr/       Architecture Decision Records
-docs/scaffold-plan.md   Handoff plan for implementation agents
+┌─────────────────────────────────────────────────────┐
+│                    Backend (Node)                    │
+│         REST (sounds CRUD) + WebSocket (play)        │
+│    Broadcasts play events to ALL connected clients   │
+└──────────┬──────────────────────────┬───────────────┘
+           │                          │
+     WebSocket                  WebSocket
+           │                          │
+┌──────────▼──────────┐   ┌──────────▼──────────┐
+│   Desktop (Electron)  │   │     PWA (Browser)    │
+│  Global hotkeys → WS  │   │   Tap to play → WS    │
+│  Renders the same PWA │   │   Works on Android    │
+└───────────────────────┘   └──────────────────────┘
 ```
 
-Workspace tooling: **pnpm workspaces**. TypeScript strict mode everywhere.
+| Component | Location | Tech | Role |
+|---|---|---|---|
+| **Shared** | `packages/shared` | TypeScript, Zod | Types, schemas, constants — single source of truth |
+| **Backend** | `apps/server` | Node.js, `ws`, `busboy` | REST API + WebSocket broadcast server |
+| **Web PWA** | `apps/web` | React, Vite, Web Audio | UI, caching, audio playback, WS client |
+| **Desktop** | `apps/desktop` | Electron, `globalShortcut` | OS-level hotkeys, wraps the PWA |
 
-## Develop (high level)
+### The broadcast-play invariant
 
-> The shared package must be built once before running the apps (it is the
-> runtime dependency for the Node server and Electron main). The root
-> `build:shared` script does this; `build` builds everything.
+> **Clients never play locally on a broadcast trigger.** When you tap **Play**
+> (or press a hotkey), a `play` *event* is sent to the backend — your client
+> plays nothing yet. The backend broadcasts `play` to **all** clients
+> (including you). Everyone plays on receipt. This ensures uniform timing and
+> zero double-play.
+>
+> **Preview** is the single exception: it plays locally only and never sends a
+> WS message.
+
+## 🚀 Quick start
+
+### Prerequisites
+
+- **Node.js** ≥ 18
+- **pnpm** ≥ 9 (`npm install -g pnpm`)
+
+### Install & run
 
 ```bash
+git clone https://github.com/AndreasMReumschuessel/bts-knet_soundboard.git
+cd bts-knet_soundboard
+
 pnpm install
-pnpm build:shared        # build packages/shared (one-time / after shared changes)
-pnpm dev                 # run all apps in parallel (web + server + desktop)
-# or individually:
-pnpm dev:server
-pnpm dev:web
-pnpm dev:desktop
+pnpm build:shared        # one-time: build the shared package
+pnpm dev                 # run web + server + desktop in parallel
 ```
 
-- Web dev server: `http://localhost:5173`
-- Backend:      `http://localhost:8080` (REST) and `ws://localhost:8080/ws` (WS)
-- Electron dev loads the Vite dev server URL; prod loads `apps/web/dist`.
-- `BTS_WS_URL` (default `ws://localhost:8080/ws`) configures the WS endpoint.
+Or run individually:
 
-See `docs/scaffold-plan.md` for the full handoff and `docs/adr/` for decisions.
+```bash
+pnpm dev:server          # backend on http://localhost:8080
+pnpm dev:web             # PWA on http://localhost:5173
+pnpm dev:desktop         # Electron app (loads the Vite dev server)
+```
 
-## Status
+Open `http://localhost:5173` in your browser, upload an MP3, and hit **Play**.
+Open a second browser tab (or another device on your network) to see the
+broadcast in action.
 
-Greenfield. The Architect has produced ADRs, the monorepo skeleton, and the
-shared package. Implementation agents (Frontend, Backend, Desktop) build the
-apps against those contracts.
+### Build for production
+
+```bash
+pnpm build               # build all workspaces
+pnpm -F @bts-soundboard/desktop package  # Windows NSIS installer
+```
+
+## ⚙️ Configuration
+
+All settings have sensible defaults. Copy `.env.example` to `.env` to override.
+
+| Setting | Default | Env var | Used by |
+|---|---|---|---|
+| Backend port | `8080` | `BTS_SERVER_PORT` | Server |
+| WebSocket URL | `ws://localhost:8080/ws` | `BTS_WS_URL` | Web, Desktop |
+| Web dev port | `5173` | `BTS_WEB_PORT` | Web (Vite) |
+| REST API base | `http://localhost:8080` | `VITE_BTS_API_BASE` | Web |
+| Sounds directory | `./data/sounds` | `BTS_SOUNDS_DIR` | Server |
+| Electron dev mode | — | `NODE_ENV=development` or `BTS_DEV=1` | Desktop |
+
+## 📁 Project layout
+
+```
+bts-knet_soundboard/
+├── apps/
+│   ├── web/                 # React PWA (Vite + React + TypeScript)
+│   ├── server/              # Node.js backend (REST + WebSocket)
+│   └── desktop/             # Electron wrapper (global hotkeys)
+├── packages/
+│   └── shared/              # Shared types + Zod schemas
+├── docs/
+│   ├── adr/                 # Architecture Decision Records (0001–0007)
+│   └── scaffold-plan.md     # Implementation handoff plan
+├── .github/
+│   ├── workflows/           # CI pipeline
+│   └── ISSUE_TEMPLATE/       # Issue templates
+├── pnpm-workspace.yaml
+└── tsconfig.base.json
+```
+
+## 📜 API reference
+
+### REST endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | Health check (`{ status, version, clients }`) |
+| `GET` | `/sounds` | List all sounds (metadata) |
+| `GET` | `/sounds/:id` | Get a single sound's metadata |
+| `GET` | `/sounds/:id/file` | Stream the MP3 file (`audio/mpeg`) |
+| `POST` | `/sounds` | Upload an MP3 (multipart `audio/mpeg`) |
+| `DELETE` | `/sounds/:id` | Delete a sound |
+
+### WebSocket events
+
+| Direction | Event | Payload | Description |
+|---|---|---|---|
+| C→S | `play` | `{ soundId, triggeredBy?, clientTimestamp }` | Request broadcast |
+| C→S | `request_sync` | — | Request full catalog |
+| S→C | `play` | `{ soundId, triggeredBy?, serverTimestamp }` | Broadcast play |
+| S→C | `sound_list` | `{ sounds: SoundMetadata[] }` | Full catalog snapshot |
+| S→C | `sound_added` | `{ sound }` | New sound available |
+| S→C | `sound_removed` | `{ soundId }` | Sound deleted |
+| S→C | `error` | `{ code, message }` | Error report |
+
+Connect to `ws://<host>:<port>/ws`.
+
+## 📔 Architecture Decision Records
+
+All non-trivial decisions are documented as ADRs in [`docs/adr/`](./docs/adr):
+
+- [ADR-0001: Tech stack & monorepo layout](./docs/adr/0001-tech-stack-and-layout.md)
+- [ADR-0002: WebSocket protocol & broadcast-play semantics](./docs/adr/0002-websocket-protocol-and-broadcast-play-semantics.md)
+- [ADR-0003: REST API shape](./docs/adr/0003-rest-api-shape.md)
+- [ADR-0004: Local sound caching strategy](./docs/adr/0004-local-sound-caching-strategy.md)
+- [ADR-0005: Hotkey model](./docs/adr/0005-hotkey-model.md)
+- [ADR-0006: Volume model](./docs/adr/0006-volume-model.md)
+- [ADR-0007: CI, release & deployment strategy](./docs/adr/0007-ci-release-and-deployment-strategy.md)
+
+## 🗺️ Roadmap
+
+- [ ] Rooms & join codes (multi-room support)
+- [ ] Per-sound volume
+- [ ] Authentication
+- [ ] Sound categories / tags
+- [ ] Search & filter
+- [ ] Upload rate limiting
+- [ ] Automated test suite
+- [ ] Code signing for Windows builds
+- [ ] Server Docker image & LXC deployment
+
+See the [open issues](https://github.com/AndreasMReumschuessel/bts-knet_soundboard/issues)
+for the full list.
+
+## 🤝 Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for
+guidelines on development setup, code style, and pull request workflow.
+
+## 📄 License
+
+MIT — see [LICENSE](./LICENSE).
+
+## 🙏 Acknowledgements
+
+Built with [React](https://react.dev), [Vite](https://vitejs.dev),
+[Electron](https://www.electronjs.org), [pnpm](https://pnpm.io), and
+[Zod](https://zod.dev).

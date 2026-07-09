@@ -1,0 +1,66 @@
+name: 🐛 Bug report
+description: Report something that's not working as expected
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the
+        sections below so we can reproduce and fix it quickly.
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the behavior.
+      placeholder: |
+        1. Start the server with `pnpm dev:server`
+        2. Open http://localhost:5173
+        3. Upload an MP3
+        4. Click Play
+        5. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which component is affected?
+      options:
+        - Backend (server)
+        - Web PWA
+        - Desktop (Electron)
+        - Shared package
+        - CI / build
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "e.g. Windows 11, macOS 14, Android 14, Ubuntu 22.04"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser (if PWA)
+      placeholder: "e.g. Chrome 126, Firefox 127, Safari 17"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / console output
+      description: Paste relevant server logs or browser console errors. No need for backticks.
+      render: shell
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might be relevant — screenshots, config, etc.
