@@ -195,7 +195,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Configure SSH agent
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.LXC_SSH_KEY }}
 
