@@ -1,3 +1,5 @@
+import type { JSX } from "react";
+
 interface VolumeControlProps {
   volume: number;
   onChange: (v: number) => void;

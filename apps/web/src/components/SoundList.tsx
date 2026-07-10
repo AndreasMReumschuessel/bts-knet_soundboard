@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type { SoundMetadata, HotkeyMap } from "@bts-soundboard/shared";
 import { SoundItem } from "./SoundItem";
 

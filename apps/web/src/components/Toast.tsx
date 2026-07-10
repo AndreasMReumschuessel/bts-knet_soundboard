@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { type JSX, useEffect } from "react";
 import type { Toast } from "../types";
 
 interface ToastStackProps {

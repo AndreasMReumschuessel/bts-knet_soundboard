@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type JSX, useEffect, useState } from "react";
 import type { SoundMetadata, HotkeyMap } from "@bts-soundboard/shared";
 
 interface SoundItemProps {
