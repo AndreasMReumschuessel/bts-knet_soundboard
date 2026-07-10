@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type JSX, useState } from "react";
 import type { FormEvent } from "react";
 
 import { MAX_UPLOAD_BYTES, SUPPORTED_MIME } from "@bts-soundboard/shared";

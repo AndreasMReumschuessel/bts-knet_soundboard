@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 
 import type { Toast } from "./types";
 import { getEngine } from "./audio/engine";

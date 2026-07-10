@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type { ConnectionState } from "../types";
 
 interface ConnectionStatusProps {
