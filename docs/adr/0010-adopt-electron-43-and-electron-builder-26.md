@@ -8,6 +8,7 @@
   ADR-0005 (hotkey model — `globalShortcut`), ADR-0007 (CI/release — Ops↔Desktop
   packaging boundary; CI uses Node 20.x), ADR-0009 (React 19 + Vite 8 — raised
   root `engines.node` to `^20.19.0 || >=22.12.0`)
+- **Amended by:** ADR-0012 (desktop `@types/node` raised from `^20` to `^24`, matching Electron 43's embedded Node 24)
 
 ## Context
 

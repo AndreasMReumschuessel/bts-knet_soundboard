@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-# BTS Soundboard server image (ADR-0007).
-# Multi-stage: node:20 build stage -> node:20-alpine runtime stage.
+# BTS Soundboard server image (ADR-0007, amended by ADR-0012).
+# Multi-stage: node:24 build stage -> node:24-alpine runtime stage.
 # Server deps are pure Node (ws, busboy, mp3-duration, zod); no native modules,
 # so the alpine runtime is safe.
 
 # ---- build stage ----------------------------------------------------------- #
-FROM node:20 AS build
+FROM node:24 AS build
 
 WORKDIR /repo
 
@@ -35,7 +35,7 @@ RUN pnpm -F @bts-soundboard/shared build && pnpm -F @bts-soundboard/server build
 RUN pnpm -F @bts-soundboard/server deploy --prod --ignore-scripts /tmp/server-deploy
 
 # ---- runtime stage --------------------------------------------------------- #
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 

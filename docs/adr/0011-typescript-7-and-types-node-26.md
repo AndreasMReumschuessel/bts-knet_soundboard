@@ -1,7 +1,8 @@
 # ADR-0011 — Adopt TypeScript 7 + pin @types/node to the Node 20 runtime
 
 - **Date:** 2026-07-10
-- **Status:** Accepted
+- **Status:** Rejected
+- **Superseded by:** ADR-0012
 - **Owner:** Architect
 - **Supersedes:** none
 - **Related:** ADR-0001 (stack & layout — TypeScript chosen; `engines.node` floor),
@@ -11,6 +12,13 @@
   `^20.19.0 || >=22.12.0`),
   ADR-0010 (Electron 43 — flagged CI→22 for Electron; `@types/node ^20`
   "cosmetic and not blocking")
+
+> **Rejected 2026-07-10:** the "pin `@types/node ^20` / Node 20 runtime floor"
+> thesis is superseded by [ADR-0012](./0012-target-node-24-lts.md), which targets
+> **Node 24 LTS** as the unified runtime floor across the monorepo (server +
+> desktop + CI + Dockerfile) and raises `@types/node` to `^24`. The **TypeScript 7
+> adoption** part of this ADR **stands and is carried forward** by ADR-0012 — only
+> the Node-20/`@types/node ^20` pin is rejected.
 
 ## Context
 

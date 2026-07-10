@@ -1,3 +1,6 @@
+# Dependabot configuration.
+# @types/node is intentionally pinned to ^24 to match the Node 24 LTS runtime
+# floor (ADR-0012). Ignore major bumps (e.g. ^26, which is "current," not LTS).
 version: 2
 updates:
   # Root + workspace npm dependencies
@@ -28,6 +31,9 @@ updates:
         patterns:
           - electron
           - electron-builder
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions
   - package-ecosystem: github-actions
@@ -35,6 +41,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    open-pull-requests-limit: 10
     labels:
       - dependencies
       - ci

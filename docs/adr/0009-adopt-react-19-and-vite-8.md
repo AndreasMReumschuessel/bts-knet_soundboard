@@ -6,6 +6,7 @@
 - **Supersedes:** none
 - **Related:** ADR-0001 (stack & layout — React/Vite chosen; `engines.node` floor),
   ADR-0008 (precedent: major-version adoption is recorded as an ADR)
+- **Amended by:** ADR-0012 (`engines.node` floor raised from `^20.19.0 || >=22.12.0` to `>=24.0.0`)
 
 ## Context
 
