@@ -18,8 +18,8 @@
   "devDependencies": {
     "@types/node": "^20.14.0",
     "cross-env": "^10.1.0",
-    "electron": "^31.3.1",
-    "electron-builder": "^24.13.3",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
     "typescript": "^5.4.5"
   }
 }
