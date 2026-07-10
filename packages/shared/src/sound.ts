@@ -15,7 +15,7 @@ export const SoundMetadataSchema = z.object({
   durationMs: z.number().int().nonnegative(),
   sizeBytes: z.number().int().nonnegative(),
   mime: z.enum(SUPPORTED_MIME_TYPES),
-  uploadedAt: z.string().datetime({ offset: true }),
+  uploadedAt: z.iso.datetime({ offset: true }),
   uploadedBy: z.string().max(100).optional(),
 });
 export type SoundMetadata = z.infer<typeof SoundMetadataSchema>;
