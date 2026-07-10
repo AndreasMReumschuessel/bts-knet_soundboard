@@ -13,7 +13,7 @@ WORKDIR /repo
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
 # Copy lockfile + workspace manifests first for install-layer caching.
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/server/package.json apps/server/
 COPY apps/desktop/package.json apps/desktop/

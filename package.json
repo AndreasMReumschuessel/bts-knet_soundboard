@@ -11,7 +11,7 @@
   "scripts": {
     "build:shared": "pnpm -F @bts-soundboard/shared build",
     "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm -F @bts-soundboard/shared build && pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "sync-versions": "node scripts/sync-versions.mjs",
     "dev:web": "pnpm -F @bts-soundboard/web dev",
