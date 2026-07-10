@@ -6,7 +6,7 @@
   "description": "Cross-platform realtime soundboard: one client triggers a sound, every connected client plays it.",
   "packageManager": "pnpm@9.12.0",
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "build:shared": "pnpm -F @bts-soundboard/shared build",

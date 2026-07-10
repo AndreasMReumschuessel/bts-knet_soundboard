@@ -1,8 +1,8 @@
 {
-  "//": "Base TS config. Apps extend this and add their own `references`. `packages/shared` adds `composite: true`. We use NodeNext module resolution (see ADR-0001): it is the strictest option and works natively for the Node server; Vite/Electron consume the ESM build of `packages/shared` via the package `exports` map.",
+  "//": "Base TS config. Apps extend this and add their own `references`. `packages/shared` adds `composite: true`. We use NodeNext module resolution (see ADR-0001): it is the strictest option and works natively for the Node server; Vite/Electron consume the ESM build of `packages/shared` via the package `exports` map. target/lib = ES2024 to match the Node 24 LTS runtime floor (ADR-0012).",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
+    "target": "ES2024",
+    "lib": ["ES2024"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,

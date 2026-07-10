@@ -5,6 +5,7 @@
 - **Owner:** Architect
 - **Supersedes:** none
 - **Related:** ADR-0001 (stack & layout), ADR-0003 (REST), ADR-0005 (hotkey/desktop)
+- **Amended by:** ADR-0012 (CI runners + Dockerfile base moved from Node 20 to Node 24 LTS)
 
 ## Context
 
