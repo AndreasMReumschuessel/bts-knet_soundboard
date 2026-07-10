@@ -1,0 +1,26 @@
+# BTS Soundboard server — LXC run template (ADR-0007).
+#
+# Run on the LXC: `docker compose up -d`.
+#
+# NOTE (ADR-0007 follow-up): the image below floats on :latest for convenience.
+# For reproducible deploys, PIN it to the released tag, e.g.
+#   ghcr.io/andreasmreumschuessel/bts-soundboard-server:v0.1.0
+# (the deploy script / release workflow should template this tag from the
+# release tag rather than floating on :latest).
+#
+# Runtime env values (BTS_SERVER_PORT, BTS_SOUNDS_DIR) live in a `.env` file on
+# the LXC next to this compose file (never committed; ADR-0007). docker compose
+# auto-loads it.
+services:
+  bts-server:
+    image: ghcr.io/andreasmreumschuessel/bts-soundboard-server:latest
+    restart: unless-stopped
+    ports:
+      - "${BTS_SERVER_PORT:-8080}:${BTS_SERVER_PORT:-8080}"
+    volumes:
+      # Host ./data/sounds (on the LXC) -> container BTS_SOUNDS_DIR so uploaded
+      # sounds persist across deploys/restarts.
+      - "./data/sounds:${BTS_SOUNDS_DIR:-/data/sounds}"
+    environment:
+      BTS_SERVER_PORT: "${BTS_SERVER_PORT:-8080}"
+      BTS_SOUNDS_DIR: "${BTS_SOUNDS_DIR:-/data/sounds}"

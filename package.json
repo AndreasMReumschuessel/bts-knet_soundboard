@@ -13,6 +13,7 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
+    "sync-versions": "node scripts/sync-versions.mjs",
     "dev:web": "pnpm -F @bts-soundboard/web dev",
     "dev:server": "pnpm -F @bts-soundboard/server dev",
     "dev:desktop": "pnpm -F @bts-soundboard/desktop dev",

@@ -1,0 +1,206 @@
+name: Release
+
+# ADR-0007: tag-triggered release pipeline + manual dispatch.
+# Produces a Windows NSIS installer, a PWA build, a server Docker image (GHCR),
+# a GitHub Release, and (opt-in) an LXC deploy.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (informational; the git tag drives semver tags when present)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # --------------------------------------------------------------------------- #
+  # Build the PWA + server (ubuntu). Uploads apps/web/dist as the web artifact.
+  # --------------------------------------------------------------------------- #
+  build-web-server:
+    name: Build web + server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          if-no-files-found: warn
+
+  # --------------------------------------------------------------------------- #
+  # Package the Windows NSIS installer natively on windows-latest.
+  # Invokes the Desktop-owned electron-builder.yml; does NOT redefine packaging.
+  # electron-builder pulls ../web/dist in as extraResources, so the web build
+  # must run on this same runner before packaging.
+  # --------------------------------------------------------------------------- #
+  package-desktop:
+    name: Package desktop installer (NSIS)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (shared + web + desktop)
+        run: pnpm build
+
+      - name: Package desktop (electron-builder NSIS)
+        run: pnpm -F @bts-soundboard/desktop package
+
+      - name: Upload desktop installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-installer
+          path: apps/desktop/dist-electron/*.exe
+          if-no-files-found: error
+
+  # --------------------------------------------------------------------------- #
+  # Build + push the server Docker image to GHCR.
+  # --------------------------------------------------------------------------- #
+  build-server-image:
+    name: Build + push server image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/andreasmreumschuessel/bts-soundboard-server
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+            type=sha
+
+      - name: Build + push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # --------------------------------------------------------------------------- #
+  # Create the GitHub Release on the tag. Attaches the NSIS .exe (required) and
+  # an optional PWA zip. Body = commit-derived release notes.
+  # --------------------------------------------------------------------------- #
+  release:
+    name: Create GitHub Release
+    needs: [build-web-server, package-desktop]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Zip PWA build
+        run: |
+          if [ -d web-dist ]; then
+            zip -r "bts-soundboard-web-${{ github.ref_name }}.zip" web-dist
+          else
+            echo "web-dist artifact missing/empty; skipping PWA zip (optional)."
+          fi
+
+      - name: Build release file list
+        id: files
+        run: |
+          # The NSIS installer is required; the PWA zip is optional (only listed
+          # when present) so a missing zip never fails the release.
+          list="desktop-installer/*.exe"
+          if [ -f "bts-soundboard-web-${{ github.ref_name }}.zip" ]; then
+            list="$list"$'\n'"bts-soundboard-web-${{ github.ref_name }}.zip"
+          fi
+          {
+            echo "list<<EOF"
+            echo "$list"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: ${{ steps.files.outputs.list }}
+          fail_on_unmatched_files: true
+
+  # --------------------------------------------------------------------------- #
+  # Opt-in deploy to the LXC container (repo variable ENABLE_LXC_DEPLOY=true).
+  # No-op otherwise.
+  # --------------------------------------------------------------------------- #
+  deploy-server:
+    name: Deploy server to LXC
+    needs: [build-server-image]
+    runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_LXC_DEPLOY == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH agent
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.LXC_SSH_KEY }}
+
+      - name: Make deploy script executable
+        run: chmod +x scripts/deploy-lxc.sh
+
+      - name: Deploy to LXC
+        run: ./scripts/deploy-lxc.sh
